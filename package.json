@@ -1,0 +1,17 @@
+{
+  "name": "sleepTracker",
+  "version": "1.0.0",
+  "description": "sleep baby tracker",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "author": "Svetlana Zinovkina",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "grammy": "^1.25.2",
+    "mongoose": "^8.4.4"
+  }
+}
