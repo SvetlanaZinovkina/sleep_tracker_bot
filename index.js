@@ -34,20 +34,20 @@ bot.command('start', async (ctx) => {
 		// await ctx.reply('Привет! Как зовут ребенка?');
 		// userState.set(ctx.chat.id, { stage: 'askName' });
 		const buttons = new InlineKeyboard()
-				.text('Начало сна', 'start_sleep')
-				.text('Окончание сна', 'end_sleep')
-				.text('Статистика', 'stats');
+				.text('Начало сна', 'start_sleep').row()
+				.text('Окончание сна', 'end_sleep').row()
+				.text('Статистика', 'stats').row();
 
 		await ctx.reply('Выберите действие:', { reply_markup: buttons });
 });
 
 bot.command('start_sleep', async (ctx) => {
-		// const chatId = ctx.callbackQuery.message.chat.id;
+		const chatId = ctx.chat.id;
 		const startTime = new Date();
 		const button = new InlineKeyboard()
 				.text('Окончание сна', 'end_sleep');
 		userState.set(chatId, { stage: 'sleeping', startTime });
-		await ctx.answerCallbackQuery('Время начала сна сохранено.');
+		// await ctx.answerCallbackQuery('Время начала сна сохранено.');
 		await ctx.reply('Сон начат. Теперь вы можете нажать кнопку "Окончание сна", когда сон закончится.', { reply_markup: button });
 
 });
@@ -57,7 +57,7 @@ bot.command('end_sleep', async (ctx) => {
 		const { data } = ctx.callbackQuery;
 
 		const buttons = new InlineKeyboard()
-				.text('Начало сна', 'start_sleep')
+				.text('Начало сна', 'start_sleep').row()
 				.text('Статистика', 'stats');
 		const state = userState.get(chatId);
 		if (!state || state.stage !== 'sleeping') {
@@ -68,8 +68,8 @@ bot.command('end_sleep', async (ctx) => {
 		const sleepTime = endTime.getTime() - state.startTime.getTime();
 		const hours = Math.floor(sleepTime / (1000 * 60 * 60));
 		const minutes = Math.floor((sleepTime % (1000 * 60 * 60)) / (1000 * 60));
-		await ctx.answerCallbackQuery(`Сон закончен. Прошло времени: ${hours} ч. ${minutes} мин.`);
-		await ctx.reply('Сон закончен.', { reply_markup: buttons });
+		await ctx.reply(`Сон закончен. Прошло времени: ${hours} ч. ${minutes} мин.`
+	, { reply_markup: buttons });
 		await saveSleepRecord(chatId, state.startTime, endTime);
 		userState.delete(chatId);
 });
@@ -89,15 +89,20 @@ bot.on('callback_query:data', async (ctx) => {
 						break;
 				case 'end_sleep':
 						const state = userState.get(chatId);
+						const buttons = new InlineKeyboard()
+				.text('Начало сна', 'start_sleep').row()
+				.text('Статистика', 'stats');
 						if (!state || state.stage !== 'sleeping') {
-								await ctx.answerCallbackQuery('Сначала начните сон кнопкой "Начало сна".');
+						  await ctx.answerCallbackQuery('Сначала начните сон');
 								return;
 						}
 						const endTime = new Date();
 						const sleepTime = endTime.getTime() - state.startTime.getTime();
-						const hours = Math.floor(sleepTime / (1000 * 60 * 60));
+				const hours = Math.floor(sleepTime / (1000 * 60 * 60));
 						const minutes = Math.floor((sleepTime % (1000 * 60 * 60)) / (1000 * 60));
 						await ctx.answerCallbackQuery(`Сон закончен. Прошло времени: ${hours} ч. ${minutes} мин.`);
+						await ctx.reply(`Сон закончен. Прошло времени: ${hours} ч. ${minutes} мин.`
+	, { reply_markup: buttons });
 						await saveSleepRecord(chatId, state.startTime, endTime);
 						userState.delete(chatId);
 						break;
@@ -130,9 +135,10 @@ async function showStats(ctx) {
 // Функция для сохранения записи о сне в MongoDB
 async function saveSleepRecord(chatId, startTime, endTime) {
 		const sleepRecord = new SleepRecord({
+			    userId: chatId,
 				sleepStart: startTime,
 				sleepEnd: endTime
-		});
+});
 		await sleepRecord.save();
 }
 
