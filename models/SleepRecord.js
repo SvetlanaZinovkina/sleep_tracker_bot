@@ -1,14 +1,11 @@
-import mongoose from 'mongoose';
+import knex from '../knex.js';
 
-const { Schema } = mongoose;
+class SleepRecord {
+		static create = async (userId, startTime) => await knex('sleep_records').insert({ user_id: userId, sleep_start: startTime });
 
-const sleepRecordSchema = new Schema({
-		userId: { type: String, required: true },
-		sleepStart: { type: Date, required: true },
-		sleepEnd: { type: Date, required: true },
-		createdAt: { type: Date, default: Date.now }
-});
+		static findByUserId = async (userId) => await knex('sleep_records').where({ user_id: userId }).orderBy('sleep_start', 'desc').first();
 
-const SleepRecord = mongoose.model('SleepRecord', sleepRecordSchema);
+		static updateEndTime = async (recordId, endTime) => await knex('sleep_records').where({ id: recordId }).update({ sleep_end: endTime });
+}
 
 export default SleepRecord;
