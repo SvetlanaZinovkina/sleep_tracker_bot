@@ -29,29 +29,7 @@ bot.command('start_sleep', handleStartSleepCommand);
 
 bot.command('end_sleep', handleEndSleepCommand);
 
-bot.on('message:text', async (ctx) => {
-		try {
-				const state = userState.get(ctx.chat.id);
-				if (state && state.stage === 'askName') {
-						const childName = ctx.message.text;
-						await User.create(ctx.chat.id, childName);
-						await ctx.reply(ctx.t('child-registered'));
-						userState.delete(ctx.chat.id);
-
-						const buttons = new InlineKeyboard()
-								.text(ctx.t('start-sleep-button'), 'start_sleep').row()
-								.text(ctx.t('end-sleep-button'), 'end_sleep').row()
-								.text(ctx.t('stats-button'), 'stats').row()
-								.text(ctx.t('change-start-sleep-button'), 'change_start_time').row()
-								.text(ctx.t('change-end-sleep-button'), 'change_end_time').row();
-
-						await ctx.reply(ctx.t('select-button'), { reply_markup: buttons });
-				}
-		} catch (error) {
-				console.error('Error in message:text handler:', error);
-				await ctx.reply(ctx.t('error-message'));
-		}
-});
+bot.on('message:text', handleTextMessage);
 
 bot.on('callback_query:data', async (ctx) => {
 		try {
