@@ -114,4 +114,69 @@ export const handleCallbackQuery = async (ctx) => {
 				console.error('Error in callback_query:data handler:', error);
 				await ctx.reply('Произошла ошибка. Пожалуйста, попробуйте еще раз.');
 		}
-}
+};
+
+export const showSleepRecordsForDate = async (ctx, date) => {
+		try {
+				const user = await User.findByTelegramId(ctx.chat.id);
+				if (!user) {
+						await ctx.reply(ctx.t('error-message'));
+						return;
+				}
+
+				const startDate = new Date(date);
+				const endDate = new Date(date);
+				endDate.setDate(endDate.getDate() + 1);
+
+				const sleepRecords = await knex('sleep_records')
+						.where({ user_id: user.id })
+						.andWhere('sleep_start', '>=', startDate)
+						.andWhere('sleep_start', '<', endDate);
+
+				if (!sleepRecords.length) {
+						await ctx.reply('Записей за выбранный день нет.');
+						return;
+				}
+
+				const keyboard = new InlineKeyboard();
+				sleepRecords.forEach(record => {
+						const startTime = new Date(record.sleep_start).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false });
+						const endTime = record.sleep_end ? new Date(record.sleep_end).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false }) : '---';
+						keyboard.text(`${startTime} - ${endTime}`, `set_sleep_record_${record.id}`).row();
+				});
+
+				await ctx.reply('Выберите запись сна:', { reply_markup: keyboard });
+		} catch (error) {
+				console.error('Error in showSleepRecordsForDate:', error);
+				await ctx.reply(ctx.t('error-message'));
+		}
+};
+
+export const updateSleepRecordTime = async (ctx, newTime) => {
+		try {
+				const chatId = ctx.chat.id;
+				const state = userState.get(chatId);
+
+				if (!state || !state.recordId) {
+						await ctx.reply(ctx.t('error-message'));
+						return;
+				}
+
+				const [hours, minutes] = newTime.split(':').map(Number);
+				const newDateTime = new Date(state.selectedDate);
+				newDateTime.setHours(hours);
+				newDateTime.setMinutes(minutes);
+
+				if (state.stage === 'changeStartTime') {
+						await SleepRecord.updateStartTime(state.recordId, newDateTime);
+				} else if (state.stage === 'changeEndTime') {
+						await SleepRecord.updateEndTime(state.recordId, newDateTime);
+				}
+
+				await ctx.reply('Время успешно обновлено.');
+				userState.delete(chatId);
+		} catch (error) {
+				console.error('Error in updateSleepRecordTime:', error);
+				await ctx.reply(ctx.t('error-message'));
+		}
+};

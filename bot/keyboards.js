@@ -10,12 +10,12 @@ export const createMainButtons = (ctx) => {
 				.text(ctx.t('stats-button'), 'stats').row()
 				.text(ctx.t('change-start-sleep-button'), 'change_start_time').row()
 				.text(ctx.t('change-end-sleep-button'), 'change_end_time').row();
-}
+};
 
 export const createEndSleepButton = (ctx) => {
 		return new InlineKeyboard()
 				.text(ctx.t('end-sleep-button'), 'end_sleep');
-}
+};
 
 export const generateDateKeyboard = () => {
 		const keyboard = new InlineKeyboard();
@@ -27,4 +27,14 @@ export const generateDateKeyboard = () => {
 				keyboard.text(dateString, `set_date_${dateString}`).row();
 		}
 		return keyboard;
-}
+};
+
+export const generateTimeKeyboard = () => {
+		const keyboard = new InlineKeyboard();
+		for (let i = 0; i < 24; i++) {
+				const hourString = i < 10 ? `0${i}` : `${i}`;
+				keyboard.text(`${hourString}:00`, `set_time_${hourString}:00`).row();
+				keyboard.text(`${hourString}:30`, `set_time_${hourString}:30`).row();
+		}
+		return keyboard;
+};

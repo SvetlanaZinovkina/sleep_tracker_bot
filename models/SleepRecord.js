@@ -5,7 +5,9 @@ class SleepRecord {
 
 		static findByUserId = async (userId) => await knex('sleep_records').where({ user_id: userId }).orderBy('sleep_start', 'desc').first();
 
-		static updateEndTime = async (recordId, endTime) => await knex('sleep_records').where({ id: recordId }).update({ sleep_end: endTime });
+		static updateEndTime = async (recordId, sleepEnd) => await knex('sleep_records').where({ id: recordId }).update({ sleep_end: sleepEnd });
+
+		static updateStartTime = async (recordId, sleepStart) => await knex('sleep_records').where({ id: recordId }).update({ sleep_start: sleepStart });
 }
 
 export default SleepRecord;
