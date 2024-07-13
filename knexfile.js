@@ -10,10 +10,9 @@ const migrations = {
 };
 
 const development = {
-		client: 'pg',
+		client: 'sqlite3',
 		connection: {
-				connectionString: process.env.DB_CONNECTION,
-				ssl: { rejectUnauthorized: false },
+				filename: path.resolve(__dirname, 'database.sqlite'),
 		},
 		useNullAsDefault: true,
 		migrations,

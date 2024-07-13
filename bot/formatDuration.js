@@ -4,10 +4,11 @@ const formatDuration = (ctx, sleepDurationMinutes) => {
 
 		let durationMessage;
 		if (hours > 0) {
-				durationMessage = `${hours} ${ctx.t('hours', { count: hours })} ${minutes} ${ctx.t('minutes', { count: minutes })}`;
+				durationMessage = `${ctx.t('hours', { count: hours })} ${ctx.t('minutes', { count: minutes })}`;
 		} else {
-				durationMessage = `${minutes} ${ctx.t('minutes', { count: minutes })}`;
+				durationMessage = `${ctx.t('minutes', { count: minutes })}`;
 		}
+		return durationMessage;
 };
 
 export default formatDuration;

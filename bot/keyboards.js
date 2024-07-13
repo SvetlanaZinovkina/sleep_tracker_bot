@@ -17,15 +17,14 @@ export const createEndSleepButton = (ctx) => {
 				.text(ctx.t('end-sleep-button'), 'end_sleep');
 };
 
-export const generateDateKeyboard = () => {
+export const generateDateKeyboard = async (userTelegramId) => {
 		const keyboard = new InlineKeyboard();
-		const today = new Date();
-		for (let i = 0; i < 7; i++) {
-				const date = new Date(today);
-				date.setDate(today.getDate() - i);
-				const dateString = date.toISOString().split('T')[0];
+		const { id } = await User.findByTelegramId(userTelegramId);
+		const datesWithSleepRecords = await SleepRecord.findDatesByUserId(id);
+		datesWithSleepRecords.forEach(date => {
+				const dateString = date.split('T')[0];
 				keyboard.text(dateString, `set_date_${dateString}`).row();
-		}
+		});
 		return keyboard;
 };
 
