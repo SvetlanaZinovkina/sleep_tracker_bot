@@ -28,12 +28,28 @@ export const generateDateKeyboard = async (userTelegramId) => {
 		return keyboard;
 };
 
-export const generateTimeKeyboard = () => {
-		const keyboard = new InlineKeyboard();
-		for (let i = 0; i < 24; i++) {
-				const hourString = i < 10 ? `0${i}` : `${i}`;
-				keyboard.text(`${hourString}:00`, `set_time_${hourString}:00`).row();
-				keyboard.text(`${hourString}:30`, `set_time_${hourString}:30`).row();
-		}
-		return keyboard;
-};
+// export const generateTimeKeyboard = () => {
+// 		const keyboard = new InlineKeyboard();
+// 		for (let i = 0; i < 24; i++) {
+// 				const hourString = i < 10 ? `0${i}` : `${i}`;
+// 				keyboard.text(`${hourString}:00`, `set_time_${hourString}:00`).row();
+// 				keyboard.text(`${hourString}:30`, `set_time_${hourString}:30`).row();
+// 		}
+// 		return keyboard;
+// };
+
+// export const generateTimeKeyboard = () => {
+// 		const keyboard = new InlineKeyboard();
+// 		for (let i = 0; i < 24; i++) {
+// 				const hourString = i < 10 ? `0${i}` : `${i}`;
+// 				const times = [`${hourString}:00`, `${hourString}:15`, `${hourString}:30`, `${hourString}:45`];
+//
+// 				times.forEach((time, index) => {
+// 						if (index % 4 === 0) {
+// 								keyboard.row();
+// 						}
+// 						keyboard.text(time, `set_time_${time}`);
+// 				});
+// 		}
+// 		return keyboard;
+// };

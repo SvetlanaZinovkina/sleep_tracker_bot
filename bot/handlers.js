@@ -2,7 +2,6 @@ import User from '../models/User.js';
 import { InlineKeyboard } from 'grammy';
 import SleepRecord from '../models/SleepRecord.js';
 import { createMainButtons, createEndSleepButton, generateDateKeyboard } from './keyboards.js';
-import { generateTimeKeyboard } from './keyboards.js';
 import formatDuration from './formatDuration.js';
 import showStats from './getStats.js';
 import knex from '../knex.js';
@@ -64,6 +63,18 @@ export const handleEndSleepCommand = async (ctx) => {
 		}
 }
 
+export const updateSleepRecordTime = async (ctx, recordId, newDateTime) => {
+		try {
+				await SleepRecord.updateStartTime(recordId, newDateTime.toISOString());
+				// const updatedRecord = await SleepRecord.findById(recordId);
+				await ctx.reply(`Время сна успешно обновлено на: ${newDateTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false })}`);
+				userState.delete(ctx.chat.id);
+		} catch (error) {
+				console.error('Error in updateSleepRecordTime:', error);
+				await ctx.reply(ctx.t('error-message'));
+		}
+}
+
 export const handleTextMessage = async (ctx) => {
 		try {
 				const state = userState.get(ctx.chat.id);
@@ -75,7 +86,18 @@ export const handleTextMessage = async (ctx) => {
 
 						const buttons = createMainButtons(ctx);
 						await ctx.reply(ctx.t('select-button'), { reply_markup: buttons });
-				}
+				} else if (state && (state.stage === 'changeStartTime' || state.stage === 'changeEndTime')) {
+						const [hours, minutes] = ctx.message.text.split(' ').map(Number);
+						if (!isNaN(hours) && !isNaN(minutes) && hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
+								const newDateTime = new Date(state.selectedDate);
+								newDateTime.setHours(hours);
+								newDateTime.setMinutes(minutes);
+								if (state.recordId) {
+										await updateSleepRecordTime(ctx, state.recordId, newDateTime);
+								}
+						}} else {
+								await ctx.reply('Неверный формат времени. Пожалуйста, введите время в формате "HH MM" (например, "10 30").');
+						}
 		} catch (error) {
 				console.error('Error in message:text handler:', error);
 				await ctx.reply(ctx.t('error-message'));
@@ -98,15 +120,15 @@ export const handleCallbackQuery = async (ctx) => {
 				if (data.startsWith('set_sleep_record_')) {
 						const recordId = data.replace('set_sleep_record_', '');
 						userState.set(chatId, { ...state, recordId });
-						await ctx.reply('Выберите новое время:', { reply_markup: generateTimeKeyboard() });
+						await ctx.reply('Введите новое время в формате "10 00":');
 						return;
 				}
 
-				if (data.startsWith('set_time_')) {
-						const newTime = data.replace('set_time_', '');
-						await updateSleepRecordTime(ctx, newTime);
-						return;
-				}
+				// if (data.startsWith('set_time_')) {
+				// 		const newTime = data.replace('set_time_', '');
+				// 		await updateSleepRecordTime(ctx, newTime);
+				// 		return;
+				// }
 
 				switch (data) {
 						case 'start_sleep':
@@ -177,7 +199,6 @@ export const showSleepRecordsForDate = async (ctx, date) => {
 						await ctx.reply('Записей за выбранный день нет.');
 						return;
 				}
-				console.log(sleepRecords)
 				const keyboard = new InlineKeyboard();
 				sleepRecords.forEach(record => {
 						const startTime = new Date(record.sleep_start).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -188,39 +209,6 @@ export const showSleepRecordsForDate = async (ctx, date) => {
 				await ctx.reply('Выберите запись сна:', { reply_markup: keyboard });
 		} catch (error) {
 				console.error('Error in showSleepRecordsForDate:', error);
-				await ctx.reply(ctx.t('error-message'));
-		}
-};
-
-export const updateSleepRecordTime = async (ctx, newTime) => {
-		try {
-				const chatId = ctx.chat.id;
-				const state = userState.get(chatId);
-
-				if (!state || !state.recordId) {
-						await ctx.reply(ctx.t('error-message'));
-						return;
-				}
-
-				const [hours, minutes] = newTime.split(':').map(Number);
-				const newDateTime = new Date(state.selectedDate);
-				newDateTime.setHours(hours);
-				newDateTime.setMinutes(minutes);
-				let updatedRecord;
-				console.log(state);
-				if (state.stage === 'changeStartTime') {
-						await SleepRecord.updateStartTime(state.recordId, newDateTime.toISOString());
-						updatedRecord = await SleepRecord.findById(state.recordId);
-						await ctx.reply(`Начало сна успешно обновлено на: ${newTime}`);
-				} else if (state.stage === 'changeEndTime') {
-						await SleepRecord.updateEndTime(state.recordId, newDateTime.toISOString());
-						updatedRecord = await SleepRecord.findById(state.recordId);
-						await ctx.reply(`Окончание сна успешно обновлено на: ${newTime}`);
-				}
-
-				userState.delete(chatId);
-		} catch (error) {
-				console.error('Error in updateSleepRecordTime:', error);
 				await ctx.reply(ctx.t('error-message'));
 		}
 };
