@@ -12,6 +12,7 @@ import {
 		changeStartTimeCommand,
 		changeEndTimeCommand
 } from './bot/handlers.js';
+import getHelp from './bot/getHelp.js';
 
 
 const bot = new Bot(process.env.BOT_TOKEN);
