@@ -1,4 +1,5 @@
-# Sleep Baby Tracker Telegram Bot
+# [Sleep Baby Tracker Telegram Bot](https://t.me/NapNannyBot)
+
 
 Этот проект представляет собой Telegram-бот для отслеживания времени сна ребенка, разработанный с использованием библиотек `grammy` и `postgreSQL`. В режиме разработки используется `SQlite3`.
 
