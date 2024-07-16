@@ -37,6 +37,8 @@ bot.command('change_end_time', changeEndTimeCommand);
 
 bot.command('stats', showStats);
 
+bot.command('how_to_use', getHelp);
+
 bot.on('message:text', handleTextMessage);
 
 bot.on('callback_query:data', handleCallbackQuery);

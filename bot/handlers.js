@@ -66,8 +66,7 @@ export const handleEndSleepCommand = async (ctx) => {
 export const updateSleepRecordTime = async (ctx, recordId, newDateTime) => {
 		try {
 				await SleepRecord.updateStartTime(recordId, newDateTime.toISOString());
-				// const updatedRecord = await SleepRecord.findById(recordId);
-				await ctx.reply(`Время сна успешно обновлено на: ${newDateTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false })}`);
+				await ctx.reply(ctx.t('change-time', { newTime: newDateTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false }) }));
 				userState.delete(ctx.chat.id);
 		} catch (error) {
 				console.error('Error in updateSleepRecordTime:', error);
@@ -96,7 +95,7 @@ export const handleTextMessage = async (ctx) => {
 										await updateSleepRecordTime(ctx, state.recordId, newDateTime);
 								}
 						}} else {
-								await ctx.reply('Неверный формат времени. Пожалуйста, введите время в формате "HH MM" (например, "10 30").');
+								await ctx.reply(ctx.t('error-time-format'));
 						}
 		} catch (error) {
 				console.error('Error in message:text handler:', error);
@@ -120,7 +119,7 @@ export const handleCallbackQuery = async (ctx) => {
 				if (data.startsWith('set_sleep_record_')) {
 						const recordId = data.replace('set_sleep_record_', '');
 						userState.set(chatId, { ...state, recordId });
-						await ctx.reply('Введите новое время в формате "10 00":');
+						await ctx.reply(ctx.t('new-time-format'));
 						return;
 				}
 
@@ -152,7 +151,7 @@ export const handleCallbackQuery = async (ctx) => {
 				}
 		} catch (error) {
 				console.error('Error in callback_query:data handler:', error);
-				await ctx.reply('Произошла ошибка. Пожалуйста, попробуйте еще раз.');
+				await ctx.reply(ctx.t('error-message'));
 		}
 };
 
