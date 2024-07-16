@@ -2,11 +2,11 @@ import { InlineKeyboard } from 'grammy';
 
 export const createMainButtons = (ctx) => {
 		return new InlineKeyboard()
-				.text('😴 ' + ctx.t('start-sleep-button'), 'start_sleep').row()
-				.text('❌ ' + ctx.t('end-sleep-button'), 'end_sleep').row()
-				.text('📊 ' + ctx.t('stats-button'), 'stats').row()
-				.text('🔄 ' + ctx.t('change-start-sleep-button'), 'change_start_time').row()
-				.text('🔄 ' + ctx.t('change-end-sleep-button'), 'change_end_time').row();
+				.text(ctx.t('start-sleep-button'), 'start_sleep').row()
+				.text(ctx.t('end-sleep-button'), 'end_sleep').row()
+				.text(ctx.t('stats-button'), 'stats').row()
+				.text(ctx.t('change-start-sleep-button'), 'change_start_time').row()
+				.text(ctx.t('change-end-sleep-button'), 'change_end_time').row();
 };
 
 export const createEndSleepButton = (ctx) => {
