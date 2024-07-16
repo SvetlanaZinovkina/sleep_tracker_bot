@@ -30,7 +30,7 @@ export const handleStartSleepCommand = async (ctx) => {
 				const startTime = new Date();
 				const button = createEndSleepButton(ctx);
 				const user = await User.findByTelegramId(chatId);
-				await SleepRecord.create(user.id, startTime.toISOString());
+				await SleepRecord.create(user.id, startTime);
 				userState.set(chatId, { stage: 'sleeping', userId: user.id, startTime });
 				await ctx.reply(ctx.t('start-sleep'), { reply_markup: button });
 		} catch (error) {
@@ -50,7 +50,7 @@ export const handleEndSleepCommand = async (ctx) => {
 
 				const endTime = new Date();
 				const sleepRecord = await SleepRecord.findByUserId(state.userId);
-				await SleepRecord.updateEndTime(sleepRecord.id, endTime.toISOString());
+				await SleepRecord.updateEndTime(sleepRecord.id, endTime);
 				const sleepDurationMinutes = (endTime - state.startTime) / (1000 * 60);
 				const durationMessage = formatDuration(ctx, sleepDurationMinutes);
 				const buttons = createMainButtons(ctx);
@@ -123,12 +123,6 @@ export const handleCallbackQuery = async (ctx) => {
 						await ctx.reply('Введите новое время в формате "10 00":');
 						return;
 				}
-
-				// if (data.startsWith('set_time_')) {
-				// 		const newTime = data.replace('set_time_', '');
-				// 		await updateSleepRecordTime(ctx, newTime);
-				// 		return;
-				// }
 
 				switch (data) {
 						case 'start_sleep':
