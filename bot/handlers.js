@@ -1,7 +1,12 @@
 import User from '../models/User.js';
 import { InlineKeyboard } from 'grammy';
 import SleepRecord from '../models/SleepRecord.js';
-import { createMainButtons, createEndSleepButton, generateDateKeyboard } from './keyboards.js';
+import {
+		createMainButtons,
+		createEndSleepButton,
+		generateDateKeyboard,
+		generateSleepRecordsKeyboard
+} from './keyboards.js';
 import formatDuration from './formatDuration.js';
 import showStats from './getStats.js';
 import knex from '../knex.js';
@@ -103,11 +108,28 @@ export const handleTextMessage = async (ctx) => {
 		}
 }
 
+export const handleDeleteSleepCommand = async (ctx) => {
+		const chatId = ctx.chat.id;
+		await ctx.reply('Выберите дату сна:', { reply_markup: await generateDateKeyboard(chatId) });
+		userState.set(chatId, { stage: 'deleteSleep' });
+};
+
+export const handleDelete = async (ctx, recordId) => {
+		await SleepRecord.deleteById(Number(recordId));
+		await ctx.reply(ctx.t('sleep-deleted'));
+};
+
 export const handleCallbackQuery = async (ctx) => {
 		try {
 				const { data } = ctx.callbackQuery;
 				const chatId = ctx.callbackQuery.message.chat.id;
 				const state = userState.get(chatId);
+
+				if (data.startsWith('set_delete_sleep_')) {
+						const recordId = data.replace('set_delete_sleep_', '');
+						await handleDelete(ctx, recordId);
+						return;
+				}
 
 				if (data.startsWith('set_date_')) {
 						const selectedDate = data.replace('set_date_', '');
@@ -146,6 +168,10 @@ export const handleCallbackQuery = async (ctx) => {
 								await changeEndTimeCommand(ctx);
 								break;
 
+						case 'delete_sleep':
+								await handleDeleteSleepCommand(ctx);
+								break;
+
 						default:
 								break;
 				}
@@ -172,6 +198,8 @@ export const changeEndTimeCommand =  async (ctx) => {
 export const showSleepRecordsForDate = async (ctx, date) => {
 		try {
 				const user = await User.findByTelegramId(ctx.chat.id);
+				const chatId = ctx.chat.id;
+				const state = userState.get(chatId);
 				if (!user) {
 						await ctx.reply(ctx.t('error-message'));
 						return;
@@ -192,12 +220,7 @@ export const showSleepRecordsForDate = async (ctx, date) => {
 						await ctx.reply('Записей за выбранный день нет.');
 						return;
 				}
-				const keyboard = new InlineKeyboard();
-				sleepRecords.forEach(record => {
-						const startTime = new Date(record.sleep_start).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false });
-						const endTime = record.sleep_end ? new Date(record.sleep_end).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false }) : '---';
-						keyboard.text(`${startTime} - ${endTime}`, `set_sleep_record_${record.id}`).row();
-				});
+				const keyboard = generateSleepRecordsKeyboard(sleepRecords, state.stage);
 
 				await ctx.reply('Выберите запись сна:', { reply_markup: keyboard });
 		} catch (error) {

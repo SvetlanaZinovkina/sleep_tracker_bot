@@ -10,7 +10,8 @@ import {
 		handleTextMessage,
 		handleCallbackQuery,
 		changeStartTimeCommand,
-		changeEndTimeCommand
+		changeEndTimeCommand,
+		handleDeleteSleepCommand
 } from './bot/handlers.js';
 import getHelp from './bot/getHelp.js';
 
@@ -35,6 +36,8 @@ bot.command('end_sleep', handleEndSleepCommand);
 bot.command('change_start_time', changeStartTimeCommand);
 
 bot.command('change_end_time', changeEndTimeCommand);
+
+bot.command('delete_sleep', handleDeleteSleepCommand);
 
 bot.command('stats', showStats);
 

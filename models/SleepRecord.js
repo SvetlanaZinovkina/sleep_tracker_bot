@@ -7,6 +7,12 @@ class SleepRecord {
 
 		static findById = async (recordId) => await knex('sleep_records').where({ id: recordId }).first();
 
+		static async deleteById(id) {
+				return knex('sleep_records')
+						.where({ id })
+						.del();
+		}
+
 		static findDatesByUserId = async (userId) => {
 				const records = await knex('sleep_records')
 						.where({ user_id: userId })
